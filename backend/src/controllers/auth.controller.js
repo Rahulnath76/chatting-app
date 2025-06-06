@@ -1,5 +1,5 @@
 import { ZodError } from "zod";
-import { loginUserValidator, userValidator } from "../../validators/user.validation.js";
+import { loginUserValidator, userValidator } from "../validators/user.validation.js";
 import { generateToken } from "../lib/utills/generateToken.js";
 import { sendError, sendSuccess } from "../lib/utills/responseHandler.js";
 import User from "../models/user.model.js";

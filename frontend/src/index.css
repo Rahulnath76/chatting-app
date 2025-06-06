@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+@layer utilities {
+  @keyframes glow {
+    0%, 100% {
+      border-color: #3b82f6; /* Tailwind's blue-500 */
+      box-shadow: 0 0 5px #3b82f6, 0 0 10px #3b82f6;
+    }
+    50% {
+      border-color: #60a5fa; /* lighter blue */
+      box-shadow: 0 0 10px #60a5fa, 0 0 20px #60a5fa;
+    }
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+}

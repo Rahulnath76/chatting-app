@@ -18,10 +18,7 @@ export const sendSuccess = (
 
 export const sendError = (res, statusCode = 500, error) => {
   if (error instanceof ZodError) {
-    const formattedErrors = {};
-    error.errors.forEach((err) => {
-      formattedErrors[err.path.join(".")] = err.message;
-    });
+    const formattedErrors = error.errors.map((err) => err.message);
 
     return res.status(400).json({
       success: false,

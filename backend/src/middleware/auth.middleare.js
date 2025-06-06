@@ -1,4 +1,4 @@
-import { sendError } from "../lib/utills/responseHandler";
+import { sendError } from "../lib/utills/responseHandler.js";
 import jwt from "jsonwebtoken";
 
 export const auth = (req, res, next) => {
