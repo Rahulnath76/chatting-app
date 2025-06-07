@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 export const auth = (req, res, next) => {
     const token = req.cookies.token;
     try {
-        if (!token) return sendError(res, 401, "You are not authorized to access this");
+        if (!token) return sendError(res, 401, new Error("You are not authorized to access this"));
 
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
         if (!decodedToken) return sendError(res, 401, "Invalid token");

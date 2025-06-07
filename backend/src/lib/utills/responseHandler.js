@@ -2,9 +2,9 @@ import { ZodError } from "zod";
 
 export const sendSuccess = (
   res,
+  statusCode = 200,
   data = undefined,
-  message = "Success",
-  statusCode = 200
+  message = "Success"
 ) => {
   const response = {
     success: true,

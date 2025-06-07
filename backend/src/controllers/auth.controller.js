@@ -29,7 +29,7 @@ export const register = async (req, res) => {
       password,
     });
 
-    sendSuccess(res, user, "User registered successfully", 201);
+    sendSuccess(res, 201, user, "User registered successfully");
   } catch (error) {
     if (error instanceof ZodError) {
       return sendError(res, 400, error);
@@ -58,7 +58,7 @@ export const login = async (req, res) => {
     generateToken(res, user._id);
     user.password = undefined;
 
-    sendSuccess(res, user, "Logged in succesfully", 200);
+    sendSuccess(res, 200, user, "Logged in succesfully");
   } catch (error) {
       console.log(error);
     if (error instanceof ZodError) {

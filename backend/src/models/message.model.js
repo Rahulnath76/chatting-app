@@ -12,14 +12,11 @@ const messageSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    content: {
+    text: {
       type: String,
-      required: true,
     },
-    messageType: {
+    image: {
       type: String,
-      enum: ["text", "image", "file"],
-      default: "text",
     },
     read: {
       type: Boolean,
