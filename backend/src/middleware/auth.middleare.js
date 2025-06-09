@@ -9,7 +9,7 @@ export const auth = (req, res, next) => {
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
         if (!decodedToken) return sendError(res, 401, "Invalid token");
 
-        req.userId = decodedToken.userId;
+        req.user = decodedToken.user;
         next();
     } catch (error) {
         return sendError(res, 500, "Internal server error");

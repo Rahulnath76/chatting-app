@@ -6,6 +6,6 @@ const router = Router();
 router.use(auth);
 
 router.post("/send/:id", sendMessage);
-router.post("/get/:id", getMessages);
+router.get("/get/:id", getMessages);
 
 export default router;

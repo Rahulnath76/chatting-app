@@ -1,13 +1,13 @@
 import toast from "react-hot-toast";
 import { setLoggedin, setSuccess } from "../../store/slices/authSlice";
-import { setUserData } from "../../store/slices/profileSlice";
+import { addFriend, setFriends, setLoading, setUserData } from "../../store/slices/profileSlice";
 import { auth } from "../api";
 import { apiConnector } from "../apiConnector";
 import type { NavigateFunction } from "react-router-dom";
 import type { AppDispatch } from "../../store/store";
 import type { AuthResponse } from "../types";
 
-const { SIGNUP_API, LOGIN_API, LOGOUT_API } = auth;
+const { SIGNUP_API, LOGIN_API, LOGOUT_API, ME_API } = auth;
 
 interface IUser {
   name?: string;
@@ -62,12 +62,13 @@ export const login = (
       if (!response.data.success) throw new Error(response.data.message);
 
       dispatch(setLoggedin(true));
-      dispatch(setUserData({ user: { ...response.data.user } }));
+      dispatch(setUserData(response.data.data));
+      dispatch(setFriends(response.data.data?.friends));
       dispatch(setSuccess(true));
 
-      localStorage.setItem("user", JSON.stringify(response.data.user));
       localStorage.setItem("isLoggedin", "true");
       toast.success("Login successful!");
+
       navigate("/");
     } catch (error: any) {
       // console.log("LOGIN API ERROR............", error);
@@ -91,8 +92,8 @@ export const logout = (navigate: NavigateFunction) => {
 
       dispatch(setLoggedin(false));
 
-      localStorage.removeItem("user");
       localStorage.removeItem("isLoggedin");
+      localStorage.removeItem("friends");
       dispatch(setUserData({ user: null }));
       toast.success("Logout successful!");
       navigate("/signin");
@@ -101,6 +102,30 @@ export const logout = (navigate: NavigateFunction) => {
       toast.error(
         error.response?.data?.message || "Logout failed. Please try again."
       );
+    }
+  };
+};
+
+
+export const fetchMe = () => {
+  return async (dispatch: AppDispatch) => {
+    dispatch(setLoading(true));
+    try {
+      const response = await apiConnector<AuthResponse>("GET", ME_API);
+      console.log(response);
+      if (!response.data.success) throw new Error(response.data.message);
+      console.log("called");
+
+      dispatch(setUserData(response.data.data));
+
+      dispatch(setFriends(response.data.data?.friends));
+
+    } catch (error: any) {
+      dispatch(setLoggedin(false));
+      dispatch(setUserData({ user: null }));
+      toast.error(error.response?.data?.message || "Failed to fetch user data.");
+    }finally{
+      dispatch(setLoading(false));
     }
   };
 };

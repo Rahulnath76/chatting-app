@@ -1,15 +1,31 @@
 export interface User {
-  _id: string;
-  name: string;
+  avatar: string;
   email: string;
-  projects: string[];
+  fullName: string;
+  username: string;
+  friends: User[] | string;
+  status: string;
   createdAt: string;
   updatedAt: string;
+  _id: string;
   __v: number;
 }
 
 export interface AuthResponse {
   success: boolean;
   message: string;
-  user?: User
+  data?: User
+}
+
+
+export interface Message{
+  sender: string;
+  receiver: string;
+  text: string;
+  image: string;
+  read: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _id: string;
+  __v: number;
 }

@@ -43,7 +43,8 @@ export const login = async (req, res) => {
     const { identifier, password } = loginUserValidator.parse(req.body);
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
     const query = isEmail ? {email: identifier} : {username: identifier};
-    const user = await User.findOne(query);
+
+    const user = await User.findOne(query).populate('friends');
 
     if (!user) {
       return sendError(res, 404, new Error("User not found, please register"));
@@ -55,7 +56,7 @@ export const login = async (req, res) => {
       return sendError(res, 401, new Error("Password do not match"));
     }
 
-    generateToken(res, user._id);
+    generateToken(res, user);
     user.password = undefined;
 
     sendSuccess(res, 200, user, "Logged in succesfully");
@@ -87,3 +88,18 @@ export const logout = async (req, res) => {
   res.status(200).json({ success: true, message: "Logged out successfully" });
 };
 
+
+export const me = async (req, res) => {
+  try {
+    // console.log(req.user);
+    const userId = req.user._id;
+    if (!userId) {
+      return sendError(res, 401, new Error("Unauthorized"));
+    }
+
+    sendSuccess(res, 200, req.user, "User data loaded successfully");
+  } catch (error) {
+    // console.log(error);
+    sendError(res, 500, error.message);
+  }
+};

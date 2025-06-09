@@ -6,11 +6,10 @@ import mongoose from "mongoose";
 
 export const sendMessage = async (req, res) => {
   try {
-    const senderId = req.userId;
+    const senderId = req.user._id;
     const { id: recieverId } = req.params;
     const { text } = req.body;
-
-    const { image } = req.files;
+    const image = req.files?.image;
 
     if (!mongoose.Types.ObjectId.isValid(recieverId))
       return sendError(res, 400, new Error("Invalid receiver ID"));
@@ -32,7 +31,7 @@ export const sendMessage = async (req, res) => {
     });
     sendSuccess(res, 201, messageResponse, "Message send succesfully");
   } catch (error) {
-    console.log(error);
+    console.log("erooooorrrororoor   ",error);
     sendError(res, 500, error);
   }
 };
@@ -40,7 +39,7 @@ export const sendMessage = async (req, res) => {
 export const getMessages = async (req, res) => {
   try {
     const { id: chatId } = req.params;
-    const userId = req.userId;
+    const userId = req.user._id;
 
     if (!mongoose.Types.ObjectId.isValid(chatId))
       return sendError(res, 400, new Error("Invalid receiver ID"));
@@ -50,7 +49,7 @@ export const getMessages = async (req, res) => {
     const messages = await Message.find({
       $or: [
         { sender: chatId, receiver: userId },
-        { sender: userId, reciever: chatId },
+        { sender: userId, receiver: chatId },
       ],
     });
 
