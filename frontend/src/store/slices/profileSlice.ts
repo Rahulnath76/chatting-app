@@ -27,7 +27,7 @@ const profileSlice = createSlice({
     },
     setFriends: (state, action) => {
       state.friends = action.payload;
-      localStorage.setItem("friends", JSON.stringify(action.payload));
+      localStorage.setItem("friends", JSON.stringify(state.friends));
     },
     addFriend: (state, action) => {
       const newFriends = Array.isArray(action.payload)
@@ -36,9 +36,19 @@ const profileSlice = createSlice({
       state.friends.push(...newFriends);
       localStorage.setItem("friends", JSON.stringify(state.friends));
     },
+
+    updateFriendList: (state, action) => {
+      const friendIndex = state.friends.findIndex(
+        (friend) => friend._id === action.payload
+      );
+      if (friendIndex !== -1) {
+        const [friend] = state.friends.splice(friendIndex, 1);
+        state.friends.unshift(friend);
+      }
+    },
   },
 });
 
-export const { setUserData, setLoading, setFriends, addFriend } =
+export const { setUserData, setLoading, setFriends, addFriend, updateFriendList } =
   profileSlice.actions;
 export default profileSlice.reducer;

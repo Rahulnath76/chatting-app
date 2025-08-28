@@ -1,32 +1,42 @@
 import { useSelector } from "react-redux";
-import { friends } from "../../data/data";
 import type { RootState } from "../../store/store";
+import type { Message } from "../../lib/types";
 
-const MessageContent = ({ message }) => {
-  const { currentChat } = useSelector((state: RootState) => state.chat);
+const MessageContent = ({ message }: { message: Message }) => {
 
+  const { user, loading } = useSelector((state: RootState) => state.profile);
+
+  if(loading) return <>Loading</>
+  // console.log(message);
+  const isMyMessage = (message.sender?._id) === user?._id;
+  
+  // console.log(isMyMessage);
+  const senderAvatar = message.sender.avatar || `https://ui-avatars.com/api/?name=${message.sender?.fullName}&background=000&color=fff`
 
   return (
-    <div className={`${message.receiver === currentChat._id && "ml-auto"}`}>
+    <div className={isMyMessage ? "ml-auto" : ""}>
       <div className="flex gap-2">
-        <div className="">
+        <div>
           <img
-            src={friends[0].avatar}
-            alt=""
+            src={senderAvatar}
+            alt="sender avatar"
             width={40}
             className="rounded-full"
           />
         </div>
         <div
           className={`${
-            message.receiver === currentChat._id
-              ? "ml-auto bg-[#2e2005]"
-              : "bg-black"
-          } p-2 px-4  rounded-xl`}
+            isMyMessage ? "ml-auto bg-[#2e2005]" : "bg-black"
+          } p-2 px-4 rounded-xl max-w-[75%] break-words`}
         >
           {message.image && (
             <div>
-              <img src={message.image} width={200} className="rounded-lg" />
+              <img
+                src={message.image}
+                width={200}
+                className="rounded-lg"
+                alt="message attachment"
+              />
             </div>
           )}
           <span>{message.text}</span>

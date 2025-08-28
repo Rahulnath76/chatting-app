@@ -4,14 +4,17 @@ import FriendList from "./FriendList";
 import { useDispatch } from "react-redux";
 import { findFriend } from "../../lib/operations/friend.api";
 import type { AppDispatch } from "../../store/store";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { logout } from "../../lib/operations/auth.api";
 
 const Sidebar = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const [searchTerm, setSearchTerm] = useState("");
   const [tab, setOpenTab] = useState(false);
   const [searchFriend, setSearchFriend] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     console.log("entered")
@@ -53,12 +56,20 @@ const Sidebar = () => {
                   inputRef.current.focus();
                 }
               }}
-              className="cursor-pointer hover:bg-gray-950 px-2 py-1 rounded-t-lg transition-all duration-200"
+              className="cursor-pointer hover:bg-gray-950 px-4 py-2 rounded-t-lg transition-all duration-200"
             >
               Add Friend
             </button>
+            <Link to="/" className="cursor-pointer hover:bg-gray-950 px-4 py-2 transition-all duration-200">My Profile</Link>
 
-            <Link to="/" className="cursor-pointer hover:bg-gray-950 px-2 py-1 rounded-b-lg transition-all duration-200">Settings</Link>
+            <button
+              onClick={() => {
+                dispatch(logout(navigate));
+              }}
+              className="cursor-pointer hover:bg-gray-950 px-4 py-2 rounded-b-lg transition-all duration-200"
+            >
+              Logout
+            </button>
           </div>
         </div>
 

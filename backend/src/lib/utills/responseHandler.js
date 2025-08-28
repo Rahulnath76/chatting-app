@@ -4,14 +4,15 @@ export const sendSuccess = (
   res,
   statusCode = 200,
   data = undefined,
-  message = "Success"
+  message = "Success",
+  dataKey = "data"
 ) => {
   const response = {
     success: true,
     message,
   };
   if (data !== undefined) {
-    response.data = data;
+    response[dataKey] = data;
   }
   return res.status(statusCode).json(response);
 };

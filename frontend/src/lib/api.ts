@@ -11,5 +11,6 @@ export const messageRoutes = {
 }
 
 export const friendRoutes = {
-  FIND_FRIEND: "/friend/addfriend"
+  FIND_FRIEND: "/friend/addfriend",
+  FRIEND_LIST: "/friend"
 }

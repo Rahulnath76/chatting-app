@@ -40,6 +40,10 @@ const userSchema = new mongoose.Schema(
       enum: ["online", "offline"],
       default: "offline",
     },
+    lastMessageTime: {
+      type: Date,
+      default: null
+    }
   },
   {
     timestamps: true,

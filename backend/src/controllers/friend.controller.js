@@ -3,7 +3,7 @@ import User from "../models/user.model.js";
 
 export const addFriend = async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = req.user._id;
     const { identifier } = req.body;
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
     const query = isEmail ? { email: identifier } : { username: identifier };
@@ -38,9 +38,31 @@ export const addFriend = async (req, res) => {
     await user.save();
     await friend.save();
 
-    return sendSuccess(res, 200, friend, "Friend added succesfully");
+    return sendSuccess(res, 200, friend, "Friend added succesfully", "friend");
   } catch (error) {
     console.log(error);
     return sendError(res, 500, "Internal server error");
   }
 };
+
+
+export const sortedFriendList = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const user = await User.findById(userId).populate({
+      path: "friends",
+      select: "fullName email avatar lastMessageTime",
+      options: {
+        sort: {
+          lastMessageTime: -1
+        }
+      }
+    });
+
+    sendSuccess(res, 200, user.friends, "Friends sorted succesfully", "friends");
+  } catch (error) {
+    console.log(error);
+    sendError(res, 500, error);
+  }
+}

@@ -5,6 +5,7 @@ export interface User {
   username: string;
   friends: User[] | string;
   status: string;
+  lastMessageTime: Date | null;
   createdAt: string;
   updatedAt: string;
   _id: string;
@@ -14,16 +15,14 @@ export interface User {
 export interface AuthResponse {
   success: boolean;
   message: string;
-  data?: User
+  user?: User
 }
 
 
 export interface Message{
-  sender: string;
-  receiver: string;
+  sender: string | User;
   text: string;
   image: string;
-  read: boolean;
   createdAt: string;
   updatedAt: string;
   _id: string;

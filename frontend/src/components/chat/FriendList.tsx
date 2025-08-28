@@ -1,10 +1,18 @@
 import { Users } from "lucide-react";
 import { useSelector } from "react-redux";
-import type { RootState } from "../../store/store";
+import type { AppDispatch, RootState } from "../../store/store";
 import FriendItem from "./FriendItem";
+import { useEffect } from "react";
+import { findSortedFriendList } from "../../lib/operations/friend.api";
+import { useDispatch } from "react-redux";
 
 const FriendList = () => {
   const { friends } = useSelector((state: RootState) => state.profile);
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    dispatch(findSortedFriendList());
+  }, []);
   
   return (
     <div className="flex-1 max-h-[calc(100vh-155px)] py-4 pr-2 bg-[#090d1e] rounded-lg h-full overflow-y-auto">

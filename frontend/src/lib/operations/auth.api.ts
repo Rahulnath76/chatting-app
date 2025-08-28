@@ -1,6 +1,6 @@
 import toast from "react-hot-toast";
 import { setLoggedin, setSuccess } from "../../store/slices/authSlice";
-import { addFriend, setFriends, setLoading, setUserData } from "../../store/slices/profileSlice";
+import { setFriends, setLoading, setUserData } from "../../store/slices/profileSlice";
 import { auth } from "../api";
 import { apiConnector } from "../apiConnector";
 import type { NavigateFunction } from "react-router-dom";
@@ -62,9 +62,10 @@ export const login = (
       if (!response.data.success) throw new Error(response.data.message);
 
       dispatch(setLoggedin(true));
-      dispatch(setUserData(response.data.data));
-      dispatch(setFriends(response.data.data?.friends));
+      dispatch(setUserData(response.data.user));
+      dispatch(setFriends(response.data.user?.friends));
       dispatch(setSuccess(true));
+      dispatch({ type: "socket/connect" });
 
       localStorage.setItem("isLoggedin", "true");
       toast.success("Login successful!");
@@ -86,7 +87,7 @@ export const login = (
 export const logout = (navigate: NavigateFunction) => {
   return async (dispatch: AppDispatch) => {
     try {
-      const response = await apiConnector<AuthResponse>("POST", LOGOUT_API);
+      const response = await apiConnector<AuthResponse>("GET", LOGOUT_API);
       console.log(response);
       if (!response.data.success) throw new Error(response.data.message);
 
@@ -95,9 +96,10 @@ export const logout = (navigate: NavigateFunction) => {
       localStorage.removeItem("isLoggedin");
       localStorage.removeItem("friends");
       dispatch(setUserData({ user: null }));
+      dispatch({ type: "socket/disconnect" });
       toast.success("Logout successful!");
       navigate("/signin");
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
       toast.error(
         error.response?.data?.message || "Logout failed. Please try again."
@@ -116,9 +118,10 @@ export const fetchMe = () => {
       if (!response.data.success) throw new Error(response.data.message);
       console.log("called");
 
-      dispatch(setUserData(response.data.data));
+      dispatch(setUserData(response.data.user));
 
-      dispatch(setFriends(response.data.data?.friends));
+      dispatch(setFriends(response.data.user?.friends));
+      dispatch({ type: "socket/connect" });
 
     } catch (error: any) {
       dispatch(setLoggedin(false));

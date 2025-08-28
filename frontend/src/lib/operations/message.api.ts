@@ -1,5 +1,11 @@
-import { addMessage, setCurrentMessages } from "../../store/slices/chatSlice";
-import type { AppDispatch } from "../../store/store";
+import {
+  addMessage,
+  addNewMessage,
+  setCurrentMessages,
+  setIsLoading,
+} from "../../store/slices/chatSlice";
+import { updateFriendList } from "../../store/slices/profileSlice";
+import type { AppDispatch, RootState } from "../../store/store";
 import { messageRoutes } from "../api";
 import { apiConnector } from "../apiConnector";
 import { socket } from "../socket";
@@ -7,47 +13,90 @@ import { socket } from "../socket";
 const { SEND_MESSAGE, GET_MESSAGE } = messageRoutes;
 
 interface SendMessageParams {
-  senderId: string;
+  receiverId: string;
   text: string;
   image?: File;
 }
 
-export const sendMessage = ({ senderId, text, image }: SendMessageParams) => {
-  return async (dispatch: AppDispatch) => {
+export const sendMessage = ({ receiverId, text, image }: SendMessageParams) => {
+  return async (dispatch: AppDispatch, getState: () => RootState) => {
     try {
       const formData = new FormData();
       formData.append("text", text);
-      formData.append("image", image);
+      if (image) formData.append("image", image);
 
-      const response = await apiConnector("POST", SEND_MESSAGE(senderId), formData);
-
+      const response = await apiConnector(
+        "POST",
+        SEND_MESSAGE(receiverId),
+        formData
+      );
       console.log(response);
-      if(!response.data.success)  throw new Error("Eroooor");
-      const message = response?.data?.data;
-      
+      if (!response.data.success) throw new Error("Failed to send message");
+
+      const message = response.data.message;
+      const conversationId = message.conversationId;
+
+      // Emit socket message
       socket.emit("send_message", {
-        message: message,
-        receiverId: message.receiver
+        receiverId,
+        message,
       });
 
+      // Optimistically update UI
+      dispatch(
+        addNewMessage({
+          chatId: receiverId,
+          message,
+        })
+      );
+
+      // Update friend's order
+      dispatch(updateFriendList(receiverId));
     } catch (error) {
-      console.log(error);
+      console.log("Send message error:", error);
     }
   };
 };
 
-
-export const getAllMessages = (chatId) => {
+export const getAllMessages = (otherUserId: string, page = 1) => {
   return async (dispatch: AppDispatch) => {
+    dispatch(setIsLoading(true));
     try {
-      const response = await apiConnector("GET", GET_MESSAGE(chatId));
-
+      const response = await apiConnector(
+        "GET",
+        `${GET_MESSAGE(otherUserId)}?page=${page}&limit=20`
+      );
       console.log(response);
-      
-      dispatch(setCurrentMessages(response.data.data));
-      // localStorage.setItem(`${chatId}`, response.data.data);
+      if (!response.data.success) throw new Error("Failed to fetch messages");
+      console.log(page);
+      const payload = {
+        chatId: otherUserId,
+        messages: response.data.messages.messages,
+        hasMore: response.data.messages.hasMore,
+        currentPage: response.data.messages.currentPage,
+      };
+
+      if (page === 1) {
+        dispatch(setCurrentMessages(payload));
+      } else {
+        dispatch(addMessage(payload));
+      }
     } catch (error) {
-      console.log(error);
+      console.log("Get messages error:", error);
     }
-  }
-}
+    finally{
+      dispatch(setIsLoading(false));
+    }
+  };
+};
+
+export const loadMoreMessages = (otherUserId: string) => {
+  return async (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState();
+    const currentChat = state.chat.messages[otherUserId];
+    console.log(currentChat);
+    if (currentChat?.hasMore) {
+      dispatch(getAllMessages(otherUserId, currentChat.currentPage + 1));
+    }
+  };
+};

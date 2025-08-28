@@ -1,36 +1,35 @@
 import type { Middleware } from "@reduxjs/toolkit";
 import { socket } from "../lib/socket";
-import { addMessage } from "../store/slices/chatSlice";
-
-const SOCKET_CONNECT = "socket/connect";
+import { addNewMessage } from "../store/slices/chatSlice";
 
 const socketMiddleware: Middleware = (store) => (next) => (action) => {
   const { dispatch, getState } = store;
   console.log(action);
-  if (action.type === SOCKET_CONNECT) {
+  if (action.type === "socket/connect") {
     
     socket.on("connect", () => {
-      console.log("socket connected", socket.id);
 
       const userId = getState().profile.user?._id;
-      // console.log(userId);
+      console.log("Socket connected with ID:", socket.id);
       if (userId) {
         socket.emit("join", userId);
         console.log("Joined socket room:", userId);
       }
     });
+
+    socket.emit("test_event", { msg: "hello server" });
+
     
-    socket.on("recieve_message", (message) => {
+    socket.on("receive_message", (message) => {
       console.log("Received message from socket:", message);
-      dispatch(addMessage(message));
+      dispatch(addNewMessage(message));
     });
-
-
+    
     socket.connect();
   }
 
   if (action.type === "socket/disconnect") {
-    console.log("disconnexted");
+    console.log("disconnected");
     socket.disconnect();
   }
   return next(action);
