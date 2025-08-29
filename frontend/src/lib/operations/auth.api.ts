@@ -1,5 +1,5 @@
 import toast from "react-hot-toast";
-import { setLoggedin, setSuccess } from "../../store/slices/authSlice";
+import { setSuccess } from "../../store/slices/authSlice";
 import { setFriends, setLoading, setUserData } from "../../store/slices/profileSlice";
 import { auth } from "../api";
 import { apiConnector } from "../apiConnector";
@@ -61,15 +61,12 @@ export const login = (
       console.log(response);
       if (!response.data.success) throw new Error(response.data.message);
 
-      dispatch(setLoggedin(true));
       dispatch(setUserData(response.data.user));
       dispatch(setFriends(response.data.user?.friends));
       dispatch(setSuccess(true));
       dispatch({ type: "socket/connect" });
 
-      localStorage.setItem("isLoggedin", "true");
       toast.success("Login successful!");
-
       navigate("/");
     } catch (error: any) {
       // console.log("LOGIN API ERROR............", error);
@@ -91,12 +88,10 @@ export const logout = (navigate: NavigateFunction) => {
       console.log(response);
       if (!response.data.success) throw new Error(response.data.message);
 
-      dispatch(setLoggedin(false));
-
       localStorage.removeItem("isLoggedin");
       localStorage.removeItem("friends");
-      dispatch(setUserData({ user: null }));
       dispatch({ type: "socket/disconnect" });
+      dispatch(setUserData(null));
       toast.success("Logout successful!");
       navigate("/signin");
     } catch (error: any) {
@@ -124,9 +119,8 @@ export const fetchMe = () => {
       dispatch({ type: "socket/connect" });
 
     } catch (error: any) {
-      dispatch(setLoggedin(false));
-      dispatch(setUserData({ user: null }));
-      toast.error(error.response?.data?.message || "Failed to fetch user data.");
+      dispatch(setUserData(null));
+      console.log(error);
     }finally{
       dispatch(setLoading(false));
     }

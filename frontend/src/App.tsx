@@ -11,16 +11,11 @@ import { fetchMe } from "./lib/operations/auth.api";
 function App() {
   const dispatch = useDispatch<AppDispatch>();
   const { user, loading } = useSelector((state: RootState) => state.profile);
-  const { isLoggedIn } = useSelector((state: RootState) => state.auth);
 
-  console.log(isLoggedIn, user);
+  // always try to fetch logged in user on mount
   useEffect(() => {
-    if (isLoggedIn && !user) {
-      dispatch(fetchMe());
-    }
-  }, [isLoggedIn, user, dispatch]);
-
-
+    dispatch(fetchMe());
+  }, [dispatch]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -29,24 +24,23 @@ function App() {
   return (
     <div className="w-full h-screen">
       <Routes>
-
+        {/* Private Route */}
         <Route
           path="/"
-          element={
-            isLoggedIn && user ? <Home /> : <Navigate to="/signin" replace />
-          }
+          element={user ? <Home /> : <Navigate to="/signin" replace />}
         />
 
         {/* Public Routes */}
         <Route
           path="/signup"
-          element={isLoggedIn ? <Navigate to="/" replace /> : <SignUp />}
+          element={user ? <Navigate to="/" replace /> : <SignUp />}
         />
         <Route
           path="/signin"
-          element={isLoggedIn ? <Navigate to="/" replace /> : <Login />}
+          element={user ? <Navigate to="/" replace /> : <Login />}
         />
 
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
