@@ -2,7 +2,7 @@ import axios from "axios";
 import type { AxiosRequestConfig, AxiosResponse, Method } from "axios";
 
 export const axiosInstance = axios.create({
-    baseURL: "http://localhost:7000/api"
+    baseURL: "https://chatting-app-b23h.onrender.com/api"
 });
 
 export const apiConnector = async <T> (
