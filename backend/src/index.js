@@ -12,6 +12,7 @@ import {initiateSocket} from "./lib/socket.js";
 import authRoutes from "./routes/auth.routes.js";
 import messageRoutes from "./routes/message.routes.js";
 import friendRoutes from "./routes/friend.routes.js";
+import testRoute from "./routes/test.route.js";
 
 dotenv.config();
 const app = express();
@@ -42,6 +43,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/friend", friendRoutes);
+
+app.use("/", testRoute);
 
 dbConnect();
 cloudinaryConnect();
