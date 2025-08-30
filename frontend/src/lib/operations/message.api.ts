@@ -19,7 +19,7 @@ interface SendMessageParams {
 }
 
 export const sendMessage = ({ receiverId, text, image }: SendMessageParams) => {
-  return async (dispatch: AppDispatch, getState: () => RootState) => {
+  return async (dispatch: AppDispatch) => {
     try {
       const formData = new FormData();
       formData.append("text", text);
@@ -34,15 +34,12 @@ export const sendMessage = ({ receiverId, text, image }: SendMessageParams) => {
       if (!response.data.success) throw new Error("Failed to send message");
 
       const message = response.data.message;
-      const conversationId = message.conversationId;
 
-      // Emit socket message
       socket.emit("send_message", {
         receiverId,
         message,
       });
 
-      // Optimistically update UI
       dispatch(
         addNewMessage({
           chatId: receiverId,
@@ -50,7 +47,6 @@ export const sendMessage = ({ receiverId, text, image }: SendMessageParams) => {
         })
       );
 
-      // Update friend's order
       dispatch(updateFriendList(receiverId));
     } catch (error) {
       console.log("Send message error:", error);

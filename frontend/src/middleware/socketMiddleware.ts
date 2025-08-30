@@ -4,7 +4,6 @@ import { addNewMessage } from "../store/slices/chatSlice";
 
 const socketMiddleware: Middleware = (store) => (next) => (action) => {
   const { dispatch, getState } = store;
-  console.log(action);
   if (action.type === "socket/connect") {
     
     socket.on("connect", () => {
