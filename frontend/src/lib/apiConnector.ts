@@ -1,8 +1,10 @@
 import axios from "axios";
 import type { AxiosRequestConfig, AxiosResponse, Method } from "axios";
 
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+
 export const axiosInstance = axios.create({
-    baseURL: "https://chatting-app-b23h.onrender.com/api"
+    baseURL: BASE_URL,
 });
 
 export const apiConnector = async <T> (
