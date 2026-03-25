@@ -35,6 +35,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    description: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     status: {
       type: String,
       enum: ["online", "offline"],
@@ -43,7 +48,15 @@ const userSchema = new mongoose.Schema(
     lastMessageTime: {
       type: Date,
       default: null
-    }
+    },
+    resetOtpHash: {
+      type: String,
+      default: null,
+    },
+    resetOtpExpires: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

@@ -3,6 +3,7 @@ export interface User {
   email: string;
   fullName: string;
   username: string;
+  description: string;
   friends: User[] | string;
   status: string;
   lastMessageTime: Date | null;

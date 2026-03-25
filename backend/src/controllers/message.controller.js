@@ -108,10 +108,10 @@ export const getMessages = async (req, res) => {
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
-    console.log(totalCount > skip + limit);
+    const hasMore = totalCount > (skip + messages.length);
     sendSuccess(res, 200, {
       messages: messages.reverse(),
-      hasMore: totalCount > (skip + limit),
+      hasMore,
       totalCount,
       currentPage: page
     }, "Message fetched succesfully", "messages");

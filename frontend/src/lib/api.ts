@@ -3,6 +3,8 @@ export const auth = {
   LOGIN_API: "/auth/login",
   LOGOUT_API: "/auth/logout",
   ME_API: "/auth/me",
+  FORGOT_PASSWORD_API: "/auth/forgot-password",
+  RESET_PASSWORD_OTP_API: "/auth/reset-password-otp",
 };
 
 export const messageRoutes = {

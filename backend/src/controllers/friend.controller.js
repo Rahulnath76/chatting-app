@@ -28,7 +28,6 @@ export const addFriend = async (req, res) => {
     const user = await User.findById(userId);
 
     if (user.friends.includes(friend._id)) {
-      console.log("111111111");
       return sendError(res, 400, new Error("User is already your friend"));
     }
 

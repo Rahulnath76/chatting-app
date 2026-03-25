@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 export interface Auth {
   loading: boolean;
@@ -14,10 +14,10 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setLoading: (state, action) => {
+    setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
-    setSuccess: (state, action) => {
+    setSuccess: (state, action: PayloadAction<boolean>) => {
       state.success = action.payload;
     }
   },

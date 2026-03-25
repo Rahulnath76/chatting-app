@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import type { AppDispatch } from "../store/store";
@@ -6,12 +5,12 @@ import AuthForm from "../components/auth/AuthForm";
 import { loginData } from "../lib/data/data";
 import { login } from "../lib/operations/auth.api";
 import type { RootState } from "../store/store";
+import { useState } from "react";
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const { success } = useSelector((state: RootState) => state.auth)
-  const [loading, setLoading] = useState(false);
+  const { success, loading } = useSelector((state: RootState) => state.auth);
   const [formData, setFormData] = useState({
     identifier: "",
     password: "",
@@ -27,8 +26,6 @@ const Login = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
-    console.log(formData);
     dispatch(login(formData, navigate));
 
     if(success){
@@ -37,7 +34,6 @@ const Login = () => {
         password: ""
       })
     }
-    setLoading(false);
   };
 
   return (
@@ -56,6 +52,15 @@ const Login = () => {
           handleSubmit={handleSubmit}
           type={"sign-in"}
         />
+
+        <div className="mb-3">
+          <Link
+            to="/forgot-password"
+            className="text-amber-300 hover:text-amber-500 transition-colors duration-200"
+          >
+            Forgot password?
+          </Link>
+        </div>
 
         <div>
           <span>Don't have an account? </span>

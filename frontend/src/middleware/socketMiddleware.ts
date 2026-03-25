@@ -1,37 +1,40 @@
 import type { Middleware } from "@reduxjs/toolkit";
 import { socket } from "../lib/socket";
 import { addNewMessage } from "../store/slices/chatSlice";
+import { updateFriendList } from "../store/slices/profileSlice";
 
-const socketMiddleware: Middleware = (store) => (next) => (action) => {
-  const { dispatch, getState } = store;
-  if (action.type === "socket/connect") {
-    
-    socket.on("connect", () => {
+const socketMiddleware: Middleware = (store) => {
+  socket.on("connect", () => {
+    console.log(store.getState().profile.user);
+    const userId = store.getState().profile.user?._id;
+    if (userId) {
+      socket.emit("join", userId);
+    }
+    console.log("Connected to socket server");
+  });
 
-      const userId = getState().profile.user?._id;
-      console.log("Socket connected with ID:", socket.id);
-      if (userId) {
-        socket.emit("join", userId);
-        console.log("Joined socket room:", userId);
+  socket.on("receive_message", (message) => {
+    store.dispatch(addNewMessage(message));
+    if(message?.chatId) {
+      store.dispatch(updateFriendList(message.chatId));
+    }
+  });
+
+  return (next) => (action: any) => {
+    if(action.type === "socket/connect") {
+      if(!socket.connected) {
+        socket.connect();
       }
-    });
+    }
 
-    socket.emit("test_event", { msg: "hello server" });
+    if(action.type === "socket/disconnect") {
+      if(socket.connected) {
+        socket.disconnect();
+      }
+    }
 
-    
-    socket.on("receive_message", (message) => {
-      console.log("Received message from socket:", message);
-      dispatch(addNewMessage(message));
-    });
-    
-    socket.connect();
+    return next(action);
   }
-
-  if (action.type === "socket/disconnect") {
-    console.log("disconnected");
-    socket.disconnect();
-  }
-  return next(action);
-};
+}
 
 export default socketMiddleware;

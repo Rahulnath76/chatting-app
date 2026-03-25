@@ -60,7 +60,7 @@ const Sidebar = () => {
             >
               Add Friend
             </button>
-            <Link to="/" className="cursor-pointer hover:bg-gray-950 px-4 py-2 transition-all duration-200">My Profile</Link>
+            <Link to="/profile" className="cursor-pointer hover:bg-gray-950 px-4 py-2 transition-all duration-200">My Profile</Link>
 
             <button
               onClick={() => {

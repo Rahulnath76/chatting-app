@@ -7,11 +7,6 @@ const initiateSocket = (io) => {
       console.log(`User ${userId} Joined the room`);
     });
 
-    // socket.on("test_event", (data) => {
-    //   console.log("Got from client", data);
-    //   socket.emit("receive_message", { text: "hi from server" });
-    // });
-
     socket.on("send_message", async (data) => {
       console.log(data);
       const payload = {
@@ -29,3 +24,5 @@ const initiateSocket = (io) => {
 };
 
 export { initiateSocket };
+
+

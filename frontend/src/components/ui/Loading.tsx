@@ -4,15 +4,14 @@ interface LoadingProps {
   message?: string;
   fullScreen?: boolean;
 }
-
-const Loading = ({ message = "Loading...", fullScreen = false }: LoadingProps) => {
+const Loading = ({
+  message = "Loading...",
+  fullScreen = false,
+}: LoadingProps) => {
   const content = (
-    <div className="flex flex-col items-center justify-center space-y-4">
-      <div className="relative">
-        <div className="absolute inset-0 bg-blue-500 rounded-full blur-xl opacity-20 animate-pulse"></div>
-        <Loader2 className="size-12 text-blue-500 animate-spin relative" />
-      </div>
-      <p className="text-slate-400 font-medium animate-pulse tracking-wide">
+    <div className="flex flex-col items-center justify-center gap-3">
+      <Loader2 className="size-8 text-blue-300 animate-spin" />
+      <p className="text-blue-200 text-sm font-medium tracking-wide">
         {message}
       </p>
     </div>
@@ -20,7 +19,7 @@ const Loading = ({ message = "Loading...", fullScreen = false }: LoadingProps) =
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050712]/90 backdrop-blur-md">
         {content}
       </div>
     );

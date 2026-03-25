@@ -9,6 +9,7 @@ import type { AppDispatch, RootState } from "../../store/store";
 import { messageRoutes } from "../api";
 import { apiConnector } from "../apiConnector";
 import { socket } from "../socket";
+import { saveFriends } from "../storage/friendsStorage";
 
 const { SEND_MESSAGE, GET_MESSAGE } = messageRoutes;
 
@@ -19,7 +20,7 @@ interface SendMessageParams {
 }
 
 export const sendMessage = ({ receiverId, text, image }: SendMessageParams) => {
-  return async (dispatch: AppDispatch) => {
+  return async (dispatch: AppDispatch, getState: () => RootState) => {
     try {
       const formData = new FormData();
       formData.append("text", text);
@@ -30,7 +31,7 @@ export const sendMessage = ({ receiverId, text, image }: SendMessageParams) => {
         SEND_MESSAGE(receiverId),
         formData
       );
-      console.log(response);
+
       if (!response.data.success) throw new Error("Failed to send message");
 
       const message = response.data.message;
@@ -48,21 +49,29 @@ export const sendMessage = ({ receiverId, text, image }: SendMessageParams) => {
       );
 
       dispatch(updateFriendList(receiverId));
+      saveFriends(getState().profile.friends);
     } catch (error) {
       console.log("Send message error:", error);
     }
   };
 };
 
-export const getAllMessages = (otherUserId: string, page = 1) => {
+export const getAllMessages = (
+  otherUserId: string,
+  page = 1,
+  options?: { silent?: boolean }
+) => {
   return async (dispatch: AppDispatch) => {
-    dispatch(setIsLoading(true));
+    const silent = options?.silent ?? false;
+    if (!silent) {
+      dispatch(setIsLoading(true));
+    }
     try {
       const response = await apiConnector(
         "GET",
         `${GET_MESSAGE(otherUserId)}?page=${page}&limit=20`
       );
-      console.log(response);
+      
       if (!response.data.success) throw new Error("Failed to fetch messages");
       console.log(page);
       const payload = {
@@ -70,6 +79,7 @@ export const getAllMessages = (otherUserId: string, page = 1) => {
         messages: response.data.messages.messages,
         hasMore: response.data.messages.hasMore,
         currentPage: response.data.messages.currentPage,
+        lastFetchedAt: Date.now(),
       };
 
       if (page === 1) {
@@ -80,8 +90,10 @@ export const getAllMessages = (otherUserId: string, page = 1) => {
     } catch (error) {
       console.log("Get messages error:", error);
     }
-    finally{
-      dispatch(setIsLoading(false));
+    finally {
+      if (!silent) {
+        dispatch(setIsLoading(false));
+      }
     }
   };
 };
@@ -90,7 +102,9 @@ export const loadMoreMessages = (otherUserId: string) => {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
     const state = getState();
     const currentChat = state.chat.messages[otherUserId];
-    console.log(currentChat);
+    if (state.chat.isLoading || !currentChat?.hasMore) {
+      return;
+    }
     if (currentChat?.hasMore) {
       dispatch(getAllMessages(otherUserId, currentChat.currentPage + 1));
     }

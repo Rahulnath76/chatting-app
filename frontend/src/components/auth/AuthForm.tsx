@@ -1,6 +1,24 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
+type AuthField = {
+  name: string;
+  value: string;
+  type: string;
+  placeholder?: string;
+  required?: boolean;
+  isPassword?: boolean;
+};
+
+interface FormType {
+  formData: Record<string, string>;
+  fields: AuthField[];
+  handleOnChange: React.ChangeEventHandler<HTMLInputElement>;
+  handleSubmit: React.FormEventHandler<HTMLFormElement>;
+  type: "sign-in" | "sign-up";
+  loading: boolean;
+}
+
 const AuthForm = ({
   formData,
   fields,
@@ -8,7 +26,7 @@ const AuthForm = ({
   handleSubmit,
   type,
   loading,
-}) => {
+}: FormType) => {
   const [showPasswordMap, setShowPasswordMap] = useState<
     Record<string, boolean>
   >({});

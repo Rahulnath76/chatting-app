@@ -1,5 +1,12 @@
 import { ZodError } from "zod";
-import { loginUserValidator, userValidator } from "../validators/user.validation.js";
+import bcrypt from "bcrypt";
+import crypto from "crypto";
+import {
+  forgotPasswordValidator,
+  loginUserValidator,
+  resetPasswordOtpValidator,
+  userValidator,
+} from "../validators/user.validation.js";
 import { generateToken } from "../lib/utills/generateToken.js";
 import { sendError, sendSuccess } from "../lib/utills/responseHandler.js";
 import User from "../models/user.model.js";
@@ -70,6 +77,73 @@ export const login = async (req, res) => {
   }
 };
 
+const OTP_TTL_MINUTES = 10;
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = forgotPasswordValidator.parse(req.body);
+    const user = await User.findOne({ email });
+
+    if (user) {
+      const otp = String(crypto.randomInt(100000, 1000000));
+      const otpHash = await bcrypt.hash(otp, 10);
+
+      user.resetOtpHash = otpHash;
+      user.resetOtpExpires = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
+      await user.save();
+
+      // TODO: integrate email service to deliver OTP
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`Password reset OTP for ${email}: ${otp}`);
+      }
+    }
+
+    return sendSuccess(
+      res,
+      200,
+      undefined,
+      "If an account exists for that email, an OTP has been sent."
+    );
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return sendError(res, 400, error);
+    }
+    return sendError(res, 500, error);
+  }
+};
+
+export const resetPasswordWithOtp = async (req, res) => {
+  try {
+    const { email, otp, password } = resetPasswordOtpValidator.parse(req.body);
+    const user = await User.findOne({ email });
+
+    if (!user || !user.resetOtpHash || !user.resetOtpExpires) {
+      return sendError(res, 400, new Error("Invalid or expired OTP"));
+    }
+
+    if (user.resetOtpExpires.getTime() < Date.now()) {
+      return sendError(res, 400, new Error("Invalid or expired OTP"));
+    }
+
+    const isMatch = await bcrypt.compare(otp, user.resetOtpHash);
+    if (!isMatch) {
+      return sendError(res, 400, new Error("Invalid or expired OTP"));
+    }
+
+    user.password = password;
+    user.resetOtpHash = null;
+    user.resetOtpExpires = null;
+    await user.save();
+
+    return sendSuccess(res, 200, undefined, "Password reset successful");
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return sendError(res, 400, error);
+    }
+    return sendError(res, 500, error);
+  }
+};
+
 export const logout = async (req, res) => {
   const token = req.cookies?.token;
   console.log(token);
@@ -105,3 +179,5 @@ export const me = async (req, res) => {
     sendError(res, 500, error.message);
   }
 };
+
+

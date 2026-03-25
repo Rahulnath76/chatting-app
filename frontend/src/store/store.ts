@@ -1,9 +1,16 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
-import profileReducer from "./slices/profileSlice";
+import profileReducer, { initialProfileState } from "./slices/profileSlice";
 import chatSlice from "./slices/chatSlice"
 import socketMiddleware from "../middleware/socketMiddleware";
+import { loadFriends } from "../lib/storage/friendsStorage";
 
+const preloadedState = {
+    profile: {
+        ...initialProfileState,
+        friends: loadFriends(),
+    },
+};
 
 export const store = configureStore({
     reducer: {
@@ -11,6 +18,7 @@ export const store = configureStore({
         profile: profileReducer,
         chat: chatSlice,
     },
+    preloadedState,
 
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().concat(socketMiddleware),

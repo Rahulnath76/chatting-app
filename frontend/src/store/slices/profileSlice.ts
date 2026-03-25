@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { User } from "../../lib/types";
 
 interface Props {
@@ -7,37 +7,33 @@ interface Props {
   loading: boolean;
 }
 
-const initialFriendsStr = localStorage.getItem("friends");
-
-const initialState: Props = {
+export const initialProfileState: Props = {
   user: null,
-  friends: initialFriendsStr ? JSON.parse(initialFriendsStr) : [],
+  friends: [],
   loading: false,
 };
 
 const profileSlice = createSlice({
   name: "profile",
-  initialState: initialState,
+  initialState: initialProfileState,
   reducers: {
-    setUserData: (state, action) => {
+    setUserData: (state, action: PayloadAction<User | null>) => {
       state.user = action.payload ?? null;
     },
-    setLoading: (state, action) => {
+    setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
-    setFriends: (state, action) => {
+    setFriends: (state, action: PayloadAction<User[]>) => {
       state.friends = action.payload;
-      localStorage.setItem("friends", JSON.stringify(state.friends));
     },
-    addFriend: (state, action) => {
+    addFriend: (state, action: PayloadAction<User | User[]>) => {
       const newFriends = Array.isArray(action.payload)
         ? action.payload
         : [action.payload];
       state.friends.push(...newFriends);
-      localStorage.setItem("friends", JSON.stringify(state.friends));
     },
 
-    updateFriendList: (state, action) => {
+    updateFriendList: (state, action: PayloadAction<string>) => {
       const friendIndex = state.friends.findIndex(
         (friend) => friend._id === action.payload
       );

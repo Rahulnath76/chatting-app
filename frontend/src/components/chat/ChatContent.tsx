@@ -9,6 +9,7 @@ import {
 } from "../../lib/operations/message.api";
 import { isNewMessage } from "../../store/slices/chatSlice";
 import { useMemo } from "react";
+import Loading from "../ui/Loading";
 
 const ChatContent = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -17,7 +18,6 @@ const ChatContent = () => {
   );
 
   const chatId = selectedChat?.userId;
-  console.log(chatId);
   const chatMessagesState = chatId ? messages[chatId] : undefined;
   const allMessages = useMemo(
     () => chatMessagesState?.messages || [],
@@ -25,20 +25,43 @@ const ChatContent = () => {
   );
   const hasMore = chatMessagesState?.hasMore || false;
   const newMessage = chatMessagesState?.newMessage || false;
+  const lastFetchedAt = chatMessagesState?.lastFetchedAt ?? 0;
+  const hasCachedMessages = !!chatMessagesState?.messages?.length;
+  const lastFetchAttemptRef = useRef<{ chatId: string; at: number } | null>(
+    null
+  );
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const scrollHeightBeforeFetch = useRef(0);
 
   useEffect(() => {
-    dispatch(getAllMessages(selectedChat?.userId));
-  }, [selectedChat?.userId, dispatch]);
+    if (!chatId) return;
+
+    const isStale = Date.now() - lastFetchedAt > 60 * 1000;
+
+    if (!hasCachedMessages) {
+      if (isLoading) return;
+      const lastAttempt = lastFetchAttemptRef.current;
+      if (lastAttempt?.chatId === chatId && Date.now() - lastAttempt.at < 1000) {
+        return;
+      }
+      lastFetchAttemptRef.current = { chatId, at: Date.now() };
+      dispatch(getAllMessages(chatId));
+      return;
+    }
+
+    if (isStale && !isLoading) {
+      dispatch(getAllMessages(chatId, 1, { silent: true }));
+    }
+  }, [chatId, hasCachedMessages, lastFetchedAt, dispatch, isLoading]);
 
   useEffect(() => {
     if (
       messagesEndRef.current &&
       allMessages.length > 0 &&
       newMessage &&
-      selectedChat?.userId
+      selectedChat?.userId &&
+      chatId
     ) {
       messagesEndRef.current.scrollIntoView({
         behavior: "smooth",
@@ -46,7 +69,7 @@ const ChatContent = () => {
       });
       dispatch(isNewMessage({ chatId, value: false }));
     }
-  }, [newMessage, selectedChat?.userId]);
+  }, [newMessage, selectedChat?.userId, allMessages.length, chatId, dispatch]);
 
   useEffect(() => {
     if (!messageContainerRef.current || scrollHeightBeforeFetch.current === 0)
@@ -62,7 +85,6 @@ const ChatContent = () => {
 
   const handleScroll = useCallback(() => {
     if (!messageContainerRef.current || isLoading || !hasMore || !chatId) {
-      console.log("executed");
       return;
     }
 
@@ -83,15 +105,28 @@ const ChatContent = () => {
         onScroll={handleScroll}
       >
         {!allMessages.length ? (
-          <div className="flex-1 flex items-center justify-center text-center text-gray-400 px-4">
-            <p className="text-base md:text-lg">
-              No messages yet. Start the conversation by sending a message.
-            </p>
-          </div>
+          isLoading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <Loading message="Loading conversation..." />
+            </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-center text-gray-400 px-4">
+              <p className="text-base md:text-lg">
+                No messages yet. Start the conversation by sending a message.
+              </p>
+            </div>
+          )
         ) : (
-          allMessages.map((message, index) => (
-            <MessageContent key={message._id || index} message={message} />
-          ))
+          <>
+            {isLoading && (
+              <div className="flex justify-center pt-2">
+                <Loading message="Loading more..." />
+              </div>
+            )}
+            {allMessages.map((message, index) => (
+              <MessageContent key={message._id || index} message={message} />
+            ))}
+          </>
         )}
         <span ref={messagesEndRef} className="h-0 overflow-hidden" />
       </div>

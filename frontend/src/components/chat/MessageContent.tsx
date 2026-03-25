@@ -1,12 +1,19 @@
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
 import type { Message } from "../../lib/types";
+import Loading from "../ui/Loading";
 
 const MessageContent = ({ message }: { message: Message }) => {
 
   const { user, loading } = useSelector((state: RootState) => state.profile);
 
-  if(loading) return <>Loading</>
+  if (loading) {
+    return (
+      <div className="py-6 flex justify-center">
+        <Loading message="Loading profile..." />
+      </div>
+    );
+  }
   // console.log(message);
   const isMyMessage = (message.sender?._id) === user?._id;
   

@@ -1,16 +1,15 @@
-import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import AuthForm from "../components/auth/AuthForm";
 import { signupData } from "../lib/data/data";
 import { signup } from "../lib/operations/auth.api";
 import type { AppDispatch, RootState } from "../store/store";
+import { useState } from "react";
 
 const SignUp = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const { success } = useSelector((state: RootState) => state.auth);
-  const [loading, setLoading] = useState(false);
+  const { success, loading } = useSelector((state: RootState) => state.auth);
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -28,10 +27,7 @@ const SignUp = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
-    console.log(formData);
     dispatch(signup(formData, navigate));
-    setLoading(false);
 
     if (success) {
       setFormData({
@@ -53,7 +49,7 @@ const SignUp = () => {
 
         <AuthForm
           loading={loading}
-          formData={signupData}
+          formData={formData}
           fields={signupData}
           handleOnChange={handleOnChange}
           handleSubmit={handleSubmit}
