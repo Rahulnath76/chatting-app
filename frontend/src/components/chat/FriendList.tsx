@@ -12,7 +12,7 @@ const FriendList = () => {
 
   useEffect(() => {
     dispatch(findSortedFriendList());
-  }, []);
+  });
   
   return (
     <div className="flex-1 max-h-[calc(100vh-155px)] py-4 pr-2 bg-[#090d1e] rounded-lg h-full overflow-y-auto">

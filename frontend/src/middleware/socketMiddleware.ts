@@ -2,6 +2,7 @@ import type { Middleware } from "@reduxjs/toolkit";
 import { socket } from "../lib/socket";
 import { addNewMessage } from "../store/slices/chatSlice";
 import { updateFriendList } from "../store/slices/profileSlice";
+import { findSortedFriendList } from "../lib/operations/friend.api";
 
 const socketMiddleware: Middleware = (store) => {
   socket.on("connect", () => {
@@ -17,6 +18,11 @@ const socketMiddleware: Middleware = (store) => {
     store.dispatch(addNewMessage(message));
     if(message?.chatId) {
       store.dispatch(updateFriendList(message.chatId));
+      const friends = store.getState().profile.friends;
+      const exists = friends.some((friend) => friend._id === message.chatId);
+      if (!exists) {
+        store.dispatch(findSortedFriendList());
+      }
     }
   });
 
