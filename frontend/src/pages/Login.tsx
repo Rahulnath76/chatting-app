@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import type { AppDispatch } from "../store/store";
 import AuthForm from "../components/auth/AuthForm";
+import AuthLayout from "../components/auth/AuthLayout";
 import { loginData } from "../lib/data/data";
 import { login } from "../lib/operations/auth.api";
 import type { RootState } from "../store/store";
@@ -28,46 +29,47 @@ const Login = () => {
     e.preventDefault();
     dispatch(login(formData, navigate));
 
-    if(success){
+    if (success) {
       setFormData({
         identifier: "",
-        password: ""
-      })
+        password: "",
+      });
     }
   };
 
   return (
-    <div className="bg-gradient-to-bl from-blue-900 to-[#1B1B1B] mx-auto w-full h-full flex items-center justify-center">
-      <div className="bg-gradient-to-r from-[#000814] to-[#0f0f0f] animate-glow text-blue-200 max-w-md w-full mx-auto p-8 py-12 rounded-2xl">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold">Welcome Back 👋</h2>
-          <p className="text-sm mt-2">Let's get you back in the conversation</p>
-        </div>
+    <AuthLayout
+      title="Welcome Back"
+      subtitle="Sign in to your account to continue chatting"
+    >
+      <AuthForm
+        loading={loading}
+        formData={formData}
+        fields={loginData}
+        handleOnChange={handleOnChange}
+        handleSubmit={handleSubmit}
+        type="sign-in"
+      />
 
-        <AuthForm
-          loading={loading}
-          formData={formData}
-          fields={loginData}
-          handleOnChange={handleOnChange}
-          handleSubmit={handleSubmit}
-          type={"sign-in"}
-        />
-
-        <div className="mb-3">
-          <Link
-            to="/forgot-password"
-            className="text-amber-300 hover:text-amber-500 transition-colors duration-200"
-          >
-            Forgot password?
-          </Link>
-        </div>
-
-        <div>
-          <span>Don't have an account? </span>
-          <Link to={"/signup"} className="text-amber-300 hover:text-amber-500 transition-colors duration-200 content-end-safe">Create an account</Link>
-        </div>
+      <div className="mt-3.5 text-right">
+        <Link
+          to="/forgot-password"
+          className="text-xs text-slate-400 hover:text-blue-400 transition-colors"
+        >
+          Forgot password?
+        </Link>
       </div>
-    </div>
+
+      <div className="mt-6 pt-5 border-t border-slate-800 text-center text-xs text-slate-400">
+        <span>Don't have an account? </span>
+        <Link
+          to="/signup"
+          className="text-blue-400 hover:text-blue-300 font-semibold transition-colors ml-1"
+        >
+          Sign up
+        </Link>
+      </div>
+    </AuthLayout>
   );
 };
 
