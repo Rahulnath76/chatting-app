@@ -2,13 +2,12 @@ import { useSelector, useDispatch } from "react-redux";
 import type { AppDispatch, RootState } from "../../store/store";
 import ChatInput from "./ChatInput";
 import MessageContent from "./MessageContent";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useMemo } from "react";
 import {
   getAllMessages,
   loadMoreMessages,
 } from "../../lib/operations/message.api";
 import { isNewMessage } from "../../store/slices/chatSlice";
-import { useMemo } from "react";
 import Loading from "../ui/Loading";
 
 const ChatContent = () => {
@@ -23,13 +22,12 @@ const ChatContent = () => {
     () => chatMessagesState?.messages || [],
     [chatMessagesState?.messages]
   );
+
   const hasMore = chatMessagesState?.hasMore || false;
   const newMessage = chatMessagesState?.newMessage || false;
   const lastFetchedAt = chatMessagesState?.lastFetchedAt ?? 0;
   const hasCachedMessages = !!chatMessagesState?.messages?.length;
-  const lastFetchAttemptRef = useRef<{ chatId: string; at: number } | null>(
-    null
-  );
+  const lastFetchAttemptRef = useRef<{ chatId: string; at: number } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const scrollHeightBeforeFetch = useRef(0);
@@ -98,29 +96,29 @@ const ChatContent = () => {
   }, [isLoading, hasMore, chatId, dispatch]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full w-full">
       <div
         ref={messageContainerRef}
-        className="p-2 flex-1 flex flex-col gap-6 overflow-y-scroll custom-scrollbar"
+        className="p-4 flex-1 flex flex-col gap-2.5 overflow-y-auto custom-scrollbar"
         onScroll={handleScroll}
       >
         {!allMessages.length ? (
           isLoading ? (
             <div className="flex-1 flex items-center justify-center">
-              <Loading message="Loading conversation..." />
+              <Loading message="Loading messages..." />
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-center text-gray-400 px-4">
-              <p className="text-base md:text-lg">
-                No messages yet. Start the conversation by sending a message.
+            <div className="flex-1 flex items-center justify-center text-center text-slate-400 px-4">
+              <p className="text-xs sm:text-sm">
+                No messages yet. Send a message to say hello!
               </p>
             </div>
           )
         ) : (
           <>
             {isLoading && (
-              <div className="flex justify-center pt-2">
-                <Loading message="Loading more..." />
+              <div className="flex justify-center py-2">
+                <Loading message="Loading older messages..." />
               </div>
             )}
             {allMessages.map((message, index) => (

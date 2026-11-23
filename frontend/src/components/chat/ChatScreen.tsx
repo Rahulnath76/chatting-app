@@ -1,15 +1,15 @@
-import ChatContent from './ChatContent'
-import ChatHeader from './ChatHeader'
+import ChatContent from './ChatContent';
+import ChatHeader from './ChatHeader';
 
 const ChatScreen = () => {
   return (
-    <div className='flex-1 h-full rounded-lg'>
-        <ChatHeader />
-        <div className='bg-[#090d1e] rounded-bl-lg h-full max-h-[calc(100vh-100px)]'>
-          <ChatContent />
-        </div>
+    <div className="flex flex-col h-full w-full overflow-hidden">
+      <ChatHeader />
+      <div className="flex-1 h-full overflow-hidden">
+        <ChatContent />
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default ChatScreen
+export default ChatScreen;

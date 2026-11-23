@@ -3,7 +3,6 @@ import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent } fro
 import { useDispatch, useSelector } from "react-redux";
 import { sendMessage } from "../../lib/operations/message.api";
 import type { AppDispatch, RootState } from "../../store/store";
-import { isNewMessage } from "../../store/slices/chatSlice";
 
 const ChatInput = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -14,12 +13,10 @@ const ChatInput = () => {
 
   const selectedChat = useSelector((state: RootState) => state.chat.selectedChat);
 
-  // Send message handler
   const sendMessageHandler = (e?: KeyboardEvent<HTMLInputElement>) => {
     if (e && e.key !== "Enter") return;
-    if (!selectedChat?.userId) return; 
-
-    if (!text.trim() && !image) return; 
+    if (!selectedChat?.userId) return;
+    if (!text.trim() && !image) return;
 
     dispatch(sendMessage({ receiverId: selectedChat.userId, text, image }));
 
@@ -30,12 +27,10 @@ const ChatInput = () => {
     }
   };
 
-  // Trigger file input click
   const triggerFileInput = () => {
     inputRef.current?.click();
   };
 
-  // Handle file input change
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -43,7 +38,6 @@ const ChatInput = () => {
     }
   };
 
-  // Create/revoke preview URL when image changes
   useEffect(() => {
     if (image) {
       const url = URL.createObjectURL(image);
@@ -55,7 +49,6 @@ const ChatInput = () => {
     }
   }, [image]);
 
-  // Remove selected image
   const removeImage = () => {
     setImage(undefined);
     if (inputRef.current) {
@@ -64,7 +57,7 @@ const ChatInput = () => {
   };
 
   return (
-    <div className="p-2 pt-3 bg-[#050712] rounded-b-lg ">
+    <div className="p-3 border-t border-slate-800/80 bg-slate-900/40">
       <input
         type="file"
         ref={inputRef}
@@ -74,32 +67,34 @@ const ChatInput = () => {
       />
 
       {image && (
-        <div className="mb-2 flex items-center gap-3 px-1 ">
+        <div className="mb-2 flex items-center gap-2 px-1">
           {previewUrl && (
-            <img
-              src={previewUrl}
-              alt="Selected"
-              className="h-14 w-14 object-cover rounded-md"
-            />
+            <div className="relative">
+              <img
+                src={previewUrl}
+                alt="Selected"
+                className="size-14 object-cover rounded-lg border border-slate-700"
+              />
+              <button
+                onClick={removeImage}
+                className="absolute -top-1.5 -right-1.5 size-5 rounded-full bg-slate-800 text-rose-400 hover:text-white flex items-center justify-center shadow"
+                aria-label="Remove image"
+              >
+                <X className="size-3.5" />
+              </button>
+            </div>
           )}
-          <button
-            onClick={removeImage}
-            className="text-rose-400 hover:text-rose-600 cursor-pointer"
-            aria-label="Remove image"
-          >
-            <X className="size-5" />
-          </button>
         </div>
       )}
 
-      <div className="flex bg-gray-900 items-center rounded-lg focus-within:ring-2 focus-within:ring-blue-900">
+      <div className="flex items-center gap-2 bg-slate-950/80 border border-slate-800 rounded-xl px-2 py-1.5 focus-within:border-slate-700 transition-colors">
         <button
-          className="hover:bg-[#0c1b30] active:bg-[#0c1b30] p-2 cursor-pointer rounded-l-lg"
           onClick={triggerFileInput}
           type="button"
-          aria-label="Attach Image"
+          aria-label="Attach image"
+          className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 rounded-lg transition-colors cursor-pointer"
         >
-          <Plus className="size-8 text-blue-300" />
+          <Plus className="size-5" />
         </button>
 
         <input
@@ -107,18 +102,19 @@ const ChatInput = () => {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={sendMessageHandler}
-          className="w-full px-2 h-12 focus:outline-none bg-transparent text-blue-200"
-          placeholder="Type your message..."
+          className="flex-1 px-2 py-1 bg-transparent text-xs sm:text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+          placeholder="Write a message..."
           spellCheck={false}
         />
 
         <button
-          className="p-2 px-5 cursor-pointer hover:bg-[#0c1b30] rounded-r-lg active:border-b-4 active:border-[#0c1b30]"
           onClick={() => sendMessageHandler()}
           type="button"
-          aria-label="Send Message"
+          disabled={!text.trim() && !image}
+          aria-label="Send message"
+          className="p-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-30 disabled:hover:bg-blue-600 text-white transition-colors cursor-pointer"
         >
-          <Send className="size-7 text-blue-200" />
+          <Send className="size-4" />
         </button>
       </div>
     </div>

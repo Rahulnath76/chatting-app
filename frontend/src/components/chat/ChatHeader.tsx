@@ -8,49 +8,44 @@ const ChatHeader = () => {
   const selectedChat = useSelector(
     (state: RootState) => state.chat.selectedChat
   );
-  const dispatch = useDispatch<AppDispatch>()
+  const dispatch = useDispatch<AppDispatch>();
   const friends = useSelector((state: RootState) => state.profile.friends);
 
-  if (!selectedChat) {
-    return (
-      <div className="flex justify-between h-20 px-4 p-2 bg-[#050712] rounded-t-lg border-b-2 border-slate-500">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gray-700 rounded-full" />
-          <h3 className="text-lg font-semibold text-gray-400">
-            No Chat Selected
-          </h3>
-        </div>
-      </div>
-    );
-  }
+  if (!selectedChat) return null;
 
-  // Find friend user info by userId stored in selectedChat
   const friend = friends.find((f) => f._id === selectedChat.userId);
 
   const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
     friend?.fullName || "User"
-  )}&background=000&color=fff`;
+  )}&background=1e293b&color=94a3b8`;
 
   return (
-    <div className="flex justify-between h-20 px-4 p-2 bg-[#050712] rounded-t-lg border-b-2 border-slate-500">
-      <div className="flex items-center gap-2">
-        <button className="cursor-pointer hover:bg-gray-800 rounded-full p-2" onClick={() => dispatch(setCurrentChat(null))}>
-          <ArrowLeft />
+    <div className="h-14 px-4 flex items-center justify-between border-b border-slate-800/80 bg-slate-900/40 shrink-0">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => dispatch(setCurrentChat(null))}
+          className="md:hidden p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors cursor-pointer"
+          aria-label="Back to conversations"
+        >
+          <ArrowLeft className="size-5" />
         </button>
-        <Link to={"/profile"}>
-          <div className="flex items-center gap-4">
-            <img
-              src={friend?.avatar || defaultAvatar}
-              alt={
-                friend?.fullName ? `${friend.fullName}'s avatar` : "User avatar"
-              }
-              width={50}
-              height={50}
-              className="rounded-full object-cover"
-            />
-            <h3 className="text-lg font-semibold">
-              {friend?.fullName || "Unknown User"}
+
+        <Link
+          to="/profile"
+          className="flex items-center gap-2.5 group transition-opacity hover:opacity-90"
+        >
+          <img
+            src={friend?.avatar || defaultAvatar}
+            alt={friend?.fullName || "User"}
+            className="size-8 rounded-full object-cover ring-1 ring-slate-800"
+          />
+          <div>
+            <h3 className="text-xs sm:text-sm font-semibold text-white leading-tight">
+              {friend?.fullName || "Chat"}
             </h3>
+            <p className="text-[11px] text-slate-400 leading-tight">
+              @{friend?.username || "user"}
+            </p>
           </div>
         </Link>
       </div>

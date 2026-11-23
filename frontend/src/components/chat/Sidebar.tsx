@@ -1,4 +1,4 @@
-import { LucideMoreVertical, Search } from "lucide-react";
+import { LucideMoreVertical, Search, UserPlus, User, LogOut, X } from "lucide-react";
 import { useRef, useState } from "react";
 import FriendList from "./FriendList";
 import { useDispatch } from "react-redux";
@@ -17,78 +17,110 @@ const Sidebar = () => {
   const [searchFriend, setSearchFriend] = useState(false);
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    console.log("entered")
-    console.log(e.key);
-    if (e.key === "Enter") {
-      dispatch(findFriend(searchTerm));
+    if (e.key === "Enter" && searchTerm.trim()) {
+      dispatch(findFriend(searchTerm.trim()));
       setSearchTerm("");
       setSearchFriend(false);
     }
   };
+
   return (
     <div
-      className="h-screen flex flex-col"
+      className="w-full h-full flex flex-col"
       onClick={() => tab && setOpenTab(false)}
     >
-      <div className="p-2 bg-[#090d1e] rounded-lg pb-4 mb-2">
-        <div className="flex justify-between items-center p-2 mb-4 relative">
-          <h3 className="text-2xl font-semibold">Chats</h3>
-            <div
-            className="relative group"
-            onClick={() => setOpenTab(!tab)}
-            >
-            <button
-              className="p-1 rounded-full hover:bg-black/65 cursor-pointer transition-all duration-200"
-            >
-              <LucideMoreVertical />
-            </button>
-            </div>
+      {/* Top Header */}
+      <div className="p-3.5 border-b border-slate-800/80">
+        <div className="flex justify-between items-center mb-3 relative">
+          <h2 className="text-lg font-bold tracking-tight text-white">
+            Chats
+          </h2>
 
-          <div
-            className={`${
-              tab ? "flex" : "hidden"
-            } absolute flex-col bg-gray-900 rounded-lg transition-all duration-200 right-5 top-10`}
-          >
+          <div className="relative">
             <button
-              onClick={() => {
-                setSearchFriend(true);
-                if (inputRef.current) {
-                  inputRef.current.focus();
-                }
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenTab(!tab);
               }}
-              className="cursor-pointer hover:bg-gray-950 px-4 py-2 rounded-t-lg transition-all duration-200"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors cursor-pointer"
+              aria-label="Menu"
             >
-              Add Friend
+              <LucideMoreVertical className="size-5" />
             </button>
-            <Link to="/profile" className="cursor-pointer hover:bg-gray-950 px-4 py-2 transition-all duration-200">My Profile</Link>
 
-            <button
-              onClick={() => {
-                dispatch(logout(navigate));
-              }}
-              className="cursor-pointer hover:bg-gray-950 px-4 py-2 rounded-b-lg transition-all duration-200"
-            >
-              Logout
-            </button>
+            {/* Dropdown Menu */}
+            {tab && (
+              <div
+                className="absolute right-0 top-8 w-44 rounded-xl border border-slate-800 bg-slate-900/95 backdrop-blur-md p-1 shadow-xl shadow-black/50 z-50 flex flex-col text-xs font-medium"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => {
+                    setOpenTab(false);
+                    setSearchFriend(true);
+                    setTimeout(() => inputRef.current?.focus(), 50);
+                  }}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors cursor-pointer text-left"
+                >
+                  <UserPlus className="size-4 text-blue-400" />
+                  <span>Add Friend</span>
+                </button>
+
+                <Link
+                  to="/profile"
+                  onClick={() => setOpenTab(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors cursor-pointer text-left"
+                >
+                  <User className="size-4 text-slate-400" />
+                  <span>My Profile</span>
+                </Link>
+
+                <div className="h-px bg-slate-800 my-1" />
+
+                <button
+                  onClick={() => {
+                    setOpenTab(false);
+                    dispatch(logout(navigate));
+                  }}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors cursor-pointer text-left"
+                >
+                  <LogOut className="size-4" />
+                  <span>Log out</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center w-full px-2  rounded-md bg-[#181c2f] text-blue-200  focus:ring-2 focus:ring-blue-200 transition">
-          <Search className="size-5" />
+        {/* Search Bar */}
+        <div className="relative flex items-center">
+          <Search className="absolute left-3 size-4 text-slate-400 pointer-events-none" />
           <input
             type="text"
-            placeholder={
-              searchFriend ? "enter email or username" : "Search Chats..."
-            }
             ref={inputRef}
-            className="w-full px-3 py-2 rounded-md bg-[#181c2f]  placeholder-gray-400 focus:outline-none"
+            placeholder={
+              searchFriend ? "Enter username or email..." : "Search chats..."
+            }
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={searchFriend ? (e) => handleSearch(e) : undefined}
+            onKeyDown={searchFriend ? handleSearch : undefined}
+            className="w-full pl-9 pr-8 py-2 text-xs rounded-xl bg-slate-950/70 border border-slate-800 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-slate-700 focus:ring-2 focus:ring-blue-500/20 transition-all"
           />
+          {searchFriend && (
+            <button
+              onClick={() => {
+                setSearchFriend(false);
+                setSearchTerm("");
+              }}
+              className="absolute right-2.5 text-slate-400 hover:text-slate-200 p-0.5 rounded"
+            >
+              <X className="size-3.5" />
+            </button>
+          )}
         </div>
       </div>
 
+      {/* Friends & Conversation List */}
       <FriendList />
     </div>
   );
